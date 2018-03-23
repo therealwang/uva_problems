@@ -38,7 +38,10 @@ class Graph:
             
 def floydwarshall(graph):
     #modified for longest path in dag
-    out = {i: {o: 0 for o in graph.vertices} for i in graph.vertices}
+    out = {i: {o: -INF for o in graph.vertices} for i in graph.vertices}
+    
+    for i in graph.vertices:
+        out[i][i] = 0
     
     edges = graph.alledges()
     
@@ -49,17 +52,33 @@ def floydwarshall(graph):
     for k in graph.vertices:
         for i in graph.vertices:
             for j in graph.vertices:
-                if out[i][j] < out[i][k] + out[k][j] and out[i][k] != 0 and out[k][j] != 0:
-                    out[i][j] = out[i][k] + out[k][j]
+                    out[i][j] = max(out[i][j],out[i][k] + out[k][j])
         
     
     return out
+
+def bellmanford(g, source):
+    #using bellman ford
+    dist = defaultdict(lambda:-INF)
+    pred = defaultdict(lambda:None)
+    
+    dist[source] = 0
+    
+    edges = g.alledges()
+    
+    for i in range(len(g.vertices)):
+        for i, o, d in edges:
+            if dist[i] + d > dist[o]:
+                dist[o] = dist[i] + d
+                pred[o] = i
+            
+    return dist
         
                 
         
 
 def main():
-    sys.stdin = open('test.txt','r')
+    #sys.stdin = open('test.txt','r')
     count = 0
     verts = int(sys.stdin.readline())
     while verts != 0:
@@ -75,17 +94,17 @@ def main():
             edge = [int(n) for n in sys.stdin.readline().split()]
         
             
-        out = floydwarshall(g)
+        out = bellmanford(g, init)
         
         longest = end = 0
         for i in range(1, verts+1):
-            if out[init][i] > longest:
-                longest = out[init][i]
+            if out[i] > longest:
+                longest = out[i]
                 end = i
         
-        print 'Case {}: The longest path from {} has length {}, finishing at {}.\n'.format(
+        print( 'Case {}: The longest path from {} has length {}, finishing at {}.\n'.format(
                 count, init, longest, end
-                )
+                ))
         
         verts = int(sys.stdin.readline())
        
